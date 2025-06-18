@@ -4,7 +4,7 @@ from datetime import datetime
 from audio_recorder_streamlit import audio_recorder
 from params import *
 
-URL = "https://pocketcoach-api-eddy-460605772486.europe-west1.run.app"
+URL = API_URL
 
 
 def send_to_llm_backend(message, session_id=None):
