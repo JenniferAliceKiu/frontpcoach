@@ -4,12 +4,15 @@ from datetime import datetime
 from audio_recorder_streamlit import audio_recorder
 from params import *
 
+URL = API_URL
+
+
 def send_to_llm_backend(message, session_id=None):
     payload = {"message": message}
     if session_id:
         payload["session_id"] = session_id
     try:
-        resp = requests.post(API_URL, json=payload, timeout=60)
+        resp = requests.post(f"{URL}/chat", json=payload, timeout=60)
         resp.raise_for_status()
         data = resp.json()
         reply = data.get("llm_response", "")
@@ -21,7 +24,7 @@ def send_to_llm_backend(message, session_id=None):
 
 def transcribe_audio_to_backend(audio_data, filename):
     files = {"audio_file": (filename, audio_data, "audio/wav")}
-    response = requests.post("http://localhost:8000/transcribe-audio/", files=files)
+    response = requests.post(f"{URL}/transcribe-audio/", files=files)
     try:
         return response.json()
     except Exception:
@@ -31,7 +34,7 @@ def transcribe_audio_to_backend(audio_data, filename):
 
 def fetch_history(session_id):
     try:
-        resp = requests.get(f"http://localhost:8000/chat/{session_id}/history", timeout=10)
+        resp = requests.get(f"{URL}/chat/{session_id}/history", timeout=10)
         resp.raise_for_status()
         data = resp.json()
         # Convert backend format to frontend format
@@ -53,7 +56,7 @@ def login():
         if username:
             try:
                 # Only send username
-                resp = requests.post(LOGIN_URL, json={"username": username}, timeout=10)
+                resp = requests.post(f"{URL}/login", json={"username": username}, timeout=10)
                 resp.raise_for_status()
                 data = resp.json()
                 session_id = data.get("session_id")
@@ -127,7 +130,7 @@ if user_input := st.chat_input("Your message..."):
 
     with st.spinner("Therapist is thinking..."):
         try:
-            resp = requests.post(API_URL, json=payload, timeout=60)
+            resp = requests.post(f"{URL}/chat", json=payload, timeout=60)
             resp.raise_for_status()
             data = resp.json()
             new_sid = data.get("session_id", None)
